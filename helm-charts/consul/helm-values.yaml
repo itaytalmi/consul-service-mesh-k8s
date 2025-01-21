@@ -1,0 +1,64 @@
+global:
+  enabled: true
+  name: consul
+  datacenter: dc1
+  acls:
+    manageSystemACLs: true
+  gossipEncryption:
+    autoGenerate: true
+  tls:
+    enabled: true
+    enableAutoEncrypt: true
+  metrics:
+    enabled: true
+    enableAgentMetrics: true
+    enableHostMetrics: true
+    enableGatewayMetrics: true
+
+server:
+  enabled: true
+  resources:
+    requests:
+      memory: 250Mi
+      cpu: 100m
+    limits:
+      memory: 500Mi
+      cpu: 200m
+
+ui:
+  enabled: true
+  ingress:
+    enabled: true
+    ingressClassName: alb
+    annotations: |
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: ip
+      alb.ingress.kubernetes.io/group.name: service-mesh
+      alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:533267158774:certificate/59a502b6-0bd6-4af7-be13-d2d89b19bbea
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
+      alb.ingress.kubernetes.io/ssl-redirect: '443'
+      alb.ingress.kubernetes.io/backend-protocol: HTTPS
+    hosts:
+      - host: it-fmsm-con-01-consul.it-cna.com
+  service:
+    type: ClusterIP
+  metrics:
+    enabled: true
+    provider: prometheus
+    baseURL: http://kube-prometheus-stack-prometheus.kube-prometheus-stack.svc.cluster.local:9090
+
+connectInject:
+  enabled: true
+  metrics:
+    defaultEnabled: true
+    # Disable merging due to a bug preventing Prometheus from scraping metrics properly - https://github.com/hashicorp/consul-k8s/issues/1813
+    defaultEnableMerging: false
+
+  apiGateway:
+    managedGatewayClass:
+      enabled: true
+      copyAnnotations:
+        service:
+          annotations: |
+            - external-dns.alpha.kubernetes.io/hostname
+            - service.beta.kubernetes.io/aws-load-balancer-scheme

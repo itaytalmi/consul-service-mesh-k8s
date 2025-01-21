@@ -1,0 +1,186 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: httpbin
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: httpbin
+  namespace: httpbin
+automountServiceAccountToken: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: httpbin
+  namespace: httpbin
+  labels:
+    app: httpbin
+    service: httpbin
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+  selector:
+    app: httpbin
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpbin
+  namespace: httpbin
+  labels:
+    app: httpbin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: httpbin
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: httpbin
+        version: v1
+      annotations:
+        consul.hashicorp.com/connect-inject: "true"
+        consul.hashicorp.com/service-meta-version: v1
+        consul.hashicorp.com/service-tags: v1
+    spec:
+      serviceAccountName: httpbin
+      containers:
+      - image: kennethreitz/httpbin
+        name: httpbin
+        ports:
+        - containerPort: 80
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceDefaults
+metadata:
+  name: httpbin
+  namespace: httpbin
+spec:
+  protocol: http
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceResolver
+metadata:
+  name: httpbin
+  namespace: httpbin
+spec:
+  defaultSubset: v1
+  subsets:
+    v1:
+      filter: 'Service.Meta.version == v1'
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: nginx-frontend
+  namespace: httpbin
+automountServiceAccountToken: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-frontend
+  namespace: httpbin
+  labels:
+    app: nginx-frontend
+    service: nginx-frontend
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+  selector:
+    app: nginx-frontend
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-frontend-conf
+  namespace: httpbin
+data:
+  default.conf: |-
+    server {
+        root /usr/share/nginx/html;
+        location / {
+            proxy_pass http://httpbin;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection upgrade;
+        }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-frontend
+  namespace: httpbin
+  labels:
+    app: nginx-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-frontend
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: nginx-frontend
+        version: v1
+      annotations:
+        consul.hashicorp.com/connect-inject: "true"
+        consul.hashicorp.com/service-meta-version: v1
+        consul.hashicorp.com/service-tags: v1
+    spec:
+      serviceAccountName: nginx-frontend
+      containers:
+      - image: nginx
+        name: nginx-frontend
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: nginx-frontend-conf
+          mountPath: /etc/nginx/conf.d
+      volumes:
+        - name: nginx-frontend-conf
+          configMap:
+            name: nginx-frontend-conf
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceDefaults
+metadata:
+  name: nginx-frontend
+  namespace: httpbin
+spec:
+  protocol: http
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceResolver
+metadata:
+  name: nginx-frontend
+  namespace: httpbin
+spec:
+  defaultSubset: v1
+  subsets:
+    v1:
+      filter: 'Service.Meta.version == v1'
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceIntentions
+metadata:
+  name: nginx-frontend-to-httpbin
+  namespace: httpbin
+spec:
+  sources:
+    - name: nginx-frontend
+      action: allow
+  destination:
+    name: httpbin

@@ -1,0 +1,15 @@
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceIntentions
+metadata:
+  name: reviews
+  namespace: consul-bookinfo
+spec:
+  destination:
+    name: reviews
+  sources:
+    - name: productpage
+      permissions:
+        - action: allow
+          http:
+            pathPrefix: /
+            methods: ['GET']

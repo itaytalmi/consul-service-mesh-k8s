@@ -1,0 +1,51 @@
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ProxyDefaults
+metadata:
+  name: global
+  namespace: default
+spec:
+  accessLogs:
+    enabled: true
+  config:
+    protocol: http
+    envoy_tracing_json: |
+      {
+        "http": {
+          "name": "envoy.tracers.zipkin",
+          "typedConfig": {
+            "@type": "type.googleapis.com/envoy.config.trace.v3.ZipkinConfig",
+            "collector_cluster": "jaeger",
+            "collector_endpoint_version": "HTTP_JSON",
+            "collector_endpoint": "/api/v2/spans",
+            "shared_span_context": false
+          }
+        }
+      }
+    envoy_extra_static_clusters_json: |
+      {
+        "name": "jaeger",
+        "type": "STRICT_DNS",
+        "connect_timeout": "3.000s",
+        "dns_lookup_family": "V4_ONLY",
+        "lb_policy": "ROUND_ROBIN",
+        "load_assignment": {
+          "cluster_name": "jaeger",
+          "endpoints": [
+            {
+              "lb_endpoints": [
+                {
+                  "endpoint": {
+                    "address": {
+                      "socket_address": {
+                        "address": "jaeger-collector.jaeger",
+                        "port_value": 9411,
+                        "protocol": "TCP"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }

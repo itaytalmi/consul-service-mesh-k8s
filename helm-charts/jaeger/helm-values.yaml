@@ -1,0 +1,29 @@
+fullnameOverride: jaeger
+
+# All-in-One In-Memory configuration is used for non-production purposes
+allInOne:
+  enabled: true
+  ingress:
+    enabled: true
+    pathType: Prefix
+    annotations:
+      kubernetes.io/ingress.class: alb
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: ip
+      alb.ingress.kubernetes.io/group.name: service-mesh
+      alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:533267158774:certificate/59a502b6-0bd6-4af7-be13-d2d89b19bbea
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
+      alb.ingress.kubernetes.io/ssl-redirect: '443'
+    hosts:
+      - it-fmsm-con-01-jaeger.it-cna.com
+
+provisionDataStore:
+  cassandra: false
+storage:
+  type: memory
+agent:
+  enabled: false
+collector:
+  enabled: false
+query:
+  enabled: false

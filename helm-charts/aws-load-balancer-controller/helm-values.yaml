@@ -1,0 +1,17 @@
+clusterName: it-fmsm-con-01
+
+defaultTargetType: ip
+
+serviceAccount:
+  create: true
+  name: aws-load-balancer-controller
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::533267158774:role/load-balancer-controller-it-fmsm-con-01
+
+externalManagedTags:
+- Created By
+- Creation Date
+- IAM Role Name
+- IAM User Name
+- Owner
+- Purpose

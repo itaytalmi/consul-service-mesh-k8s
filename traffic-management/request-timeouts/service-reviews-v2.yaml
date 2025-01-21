@@ -1,0 +1,8 @@
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceSplitter
+metadata:
+  name: reviews
+spec:
+  splits:
+    - weight: 100
+      serviceSubset: v2

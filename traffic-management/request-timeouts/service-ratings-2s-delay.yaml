@@ -1,0 +1,12 @@
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceDefaults
+metadata:
+  name: ratings
+spec:
+  envoyExtensions:
+  - name: builtin/fault-injection
+    arguments:
+      config:
+        delay:
+          duration: 2s
+          percentage: 100

@@ -1,0 +1,11 @@
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceRouter
+metadata:
+  name: httpbin
+  namespace: httpbin
+spec:
+  routes:
+    - destination:
+        service: httpbin
+        serviceSubset: v1
+        requestTimeout: 2s

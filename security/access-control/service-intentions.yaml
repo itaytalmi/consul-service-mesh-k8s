@@ -1,0 +1,47 @@
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceIntentions
+metadata:
+  name: productpage-to-details
+  namespace: consul-bookinfo
+spec:
+  sources:
+    - name: productpage
+      action: allow
+  destination:
+    name: details
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceIntentions
+metadata:
+  name: productpage-to-reviews
+  namespace: consul-bookinfo
+spec:
+  sources:
+    - name: productpage
+      action: allow
+  destination:
+    name: reviews
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceIntentions
+metadata:
+  name: reviews-to-ratings
+  namespace: consul-bookinfo
+spec:
+  sources:
+    - name: reviews
+      action: allow
+  destination:
+    name: ratings
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceIntentions
+metadata:
+  name: deny-all
+  namespace: consul-bookinfo
+spec:
+  destination:
+    name: '*'
+  sources:
+    - name: '*'
+      action: deny

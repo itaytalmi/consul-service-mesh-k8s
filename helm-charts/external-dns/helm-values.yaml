@@ -1,0 +1,15 @@
+provider: aws
+domainFilters:
+  - it-cna.com
+sources:
+  - ingress
+  - service
+policy: sync
+registry: txt
+txtOwnerId: it-fmsm-con-01
+
+serviceAccount:
+  create: true
+  name: external-dns
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::533267158774:role/external-dns-it-fmsm-con-01

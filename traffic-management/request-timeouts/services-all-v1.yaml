@@ -1,0 +1,75 @@
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceResolver
+metadata:
+  name: reviews
+spec:
+  subsets:
+    v1:
+      filter: 'Service.Meta.version == v1'
+    v2:
+      filter: 'Service.Meta.version == v2'
+    v3:
+      filter: 'Service.Meta.version == v3'
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceResolver
+metadata:
+  name: ratings
+spec:
+  subsets:
+    v1:
+      filter: 'Service.Meta.version == v1'
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceResolver
+metadata:
+  name: details
+spec:
+  subsets:
+    v1:
+      filter: 'Service.Meta.version == v1'
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceResolver
+metadata:
+  name: productpage
+spec:
+  subsets:
+    v1:
+      filter: 'Service.Meta.version == v1'
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceSplitter
+metadata:
+  name: reviews
+spec:
+  splits:
+    - weight: 100
+      serviceSubset: v1
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceSplitter
+metadata:
+  name: ratings
+spec:
+  splits:
+    - weight: 100
+      serviceSubset: v1
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceSplitter
+metadata:
+  name: details
+spec:
+  splits:
+    - weight: 100
+      serviceSubset: v1
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceSplitter
+metadata:
+  name: productpage
+spec:
+  splits:
+    - weight: 100
+      serviceSubset: v1
